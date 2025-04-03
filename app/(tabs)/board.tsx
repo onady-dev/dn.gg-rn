@@ -85,6 +85,9 @@ export default function BoardScreen() {
             <GameNameStyled style={{ backgroundColor: currentGame === game.getId() ? "#b1b0b0" : "white" }}>
               {game.getHomeTeam().getName()} vs {game.getAwayTeam().getName()}
             </GameNameStyled>
+            <GameDateStyled>
+              {game.getCreatedAt().toLocaleDateString()} {game.getCreatedAt().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </GameDateStyled>
           </GameBoxStyled>
         ))}
         <GameAddBtnStyled
@@ -244,14 +247,18 @@ const GameBoxStyled = styled(TouchableOpacity)`
 `;
 
 const GameNameStyled = styled(Text)`
-  text-align: center;
-  font-size: 30px;
+  font-size: 40px;
   font-weight: bold;
   color: black;
-  width: 100px;
-  margin: 5px;
-  background-color: #b1b0b0;
+  margin: 10px;
   border-radius: 10px;
+`;
+
+const GameDateStyled = styled(Text)`
+  font-size: 15px;
+  font-weight: bold;
+  color: gray;
+  margin: 0 10px 10px 10px;
 `;
 
 const GameAddBtnStyled = styled(TouchableOpacity)`
