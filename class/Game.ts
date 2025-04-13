@@ -23,6 +23,9 @@ class Game {
   getId() {
     return this.id;
   }
+  setId(id: number) {
+    this.id = id;
+  }
   getHomeTeam() {
     return this.homeTeam;
   }

@@ -14,16 +14,20 @@ export default function BasicModal({
   isModalVisible: boolean;
   onPressConfirm: () => void;
   onChangeText: (text: string) => void;
-  placeholder: string;
+  placeholder?: string;
   isCancelable?: boolean;
   setIsModalVisible: (isModalVisible: boolean) => void;
 }) {
   return (
     <Modal visible={isModalVisible} animationType="slide" transparent={true}>
       <ModalView>
-        <GroupName placeholderTextColor={"gray"} placeholder={placeholder} onChangeText={onChangeText}>
-          {text}
-        </GroupName>
+        {placeholder ? (
+          <TextInputStyled placeholderTextColor={"gray"} placeholder={placeholder} onChangeText={onChangeText}>
+            {text}
+          </TextInputStyled>
+        ) : (
+          <TextStyled>{text}</TextStyled>
+        )}
         <BtnBox>
           <ConfirmBtn onPress={onPressConfirm}>확인</ConfirmBtn>
           {isCancelable && <CancelBtn onPress={() => setIsModalVisible(false)}>취소</CancelBtn>}
@@ -57,7 +61,7 @@ const ModalView = styled(View)`
   border-width: 2px;
 `;
 
-const GroupName = styled(TextInput)`
+const TextInputStyled = styled(TextInput)`
   width: 100%;
   font-size: 30px;
   text-align: center;
@@ -67,6 +71,16 @@ const GroupName = styled(TextInput)`
   background-color: #f4f4f4;
   border-width: 1px;
   border-radius: 10px;
+`;
+
+const TextStyled = styled(Text)`
+  width: 100%;
+  font-size: 30px;
+  text-align: center;
+  color: #000000;
+  font-weight: bold;
+  padding: 10px;
+  margin: 10px;
 `;
 
 const ConfirmBtn = styled(Text)`
