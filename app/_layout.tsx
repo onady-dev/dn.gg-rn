@@ -10,6 +10,7 @@ import { Modal, Text, TextInput, View } from "react-native";
 import "react-native-reanimated";
 import { RecoilRoot } from "recoil";
 import styled from "styled-components";
+import logItemState from "@/atoms/LogItemState";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,6 +25,8 @@ export default function RootLayout() {
     const asyncWrap = async () => {
       const group = await AsyncStorage.getItem("group");
       if (group) {
+        const logitems = await getLogItems("1");
+        await AsyncStorage.setItem("logItems", JSON.stringify(logitems));
         setIsModalVisible(false);
       }
     };
@@ -40,10 +43,14 @@ export default function RootLayout() {
     const { data } = await getGroupByName(groupName);
     if (data) {
       await AsyncStorage.setItem("group", JSON.stringify({ id: data.id, name: data.name }));
+      const logitems = await getLogItems(data.id);
+      await AsyncStorage.setItem("logItems", JSON.stringify(logitems));
       setIsModalVisible(false);
     } else {
       const { data } = await createGroup(groupName);
       await AsyncStorage.setItem("group", JSON.stringify({ id: data.id, name: data.name }));
+      const logitems = await getLogItems(data.id);
+      await AsyncStorage.setItem("logItems", JSON.stringify(logitems));
       setIsModalVisible(false);
     }
   };
@@ -54,6 +61,15 @@ export default function RootLayout() {
 
   const createGroup = async (name: string) => {
     return await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/group`, { name });
+  };
+
+  const getLogItems = async (groupId: string) => {
+    const res = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/logitem?groupId=${groupId}`);
+    const map = new Map();
+    res.data.map((logItem: LogItem, i: number) => {
+      map.set(i, { name: logItem.name, value: logItem.value });
+    });
+    return res.data;
   };
 
   if (!loaded) {

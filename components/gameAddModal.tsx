@@ -17,14 +17,21 @@ export default function GameAddModal({
 }) {
   const [selectedTeams, setSelectedTeams] = useState<Team[]>([]);
 
-  const onPress = () => {
+  useEffect(() => {
+    if (selectedTeams.length > 2) {
+      setSelectedTeams(selectedTeams.slice(0, 2));
+    }
+  }, [selectedTeams]);
+
+  const onPressConfirmBtn = () => {
     onPressConfirm(selectedTeams);
     setSelectedTeams([]);
   };
 
-  useEffect(() => {
-    console.log(selectedTeams);
-  }, [selectedTeams]);
+  const onPressCancelBtn = () => {
+    setIsModalVisible(false);
+    setSelectedTeams([]);
+  };
 
   const onPressTeam = (id: number, isPressed: boolean) => {
     const team = teams.find((team) => team.getId() === id);
@@ -38,12 +45,12 @@ export default function GameAddModal({
       <ModalViewStyled>
         <TeamBoxContainerStyled>
           {teams.map((team) => (
-            <SelectAbleTeamBtn key={team.getId()} id={team.getId()} text={team.getName()} onPress={onPressTeam} />
+            <SelectAbleTeamBtn key={team.getId()} id={team.getId()} text={team.getName()} onPress={onPressTeam} selectedTeams={selectedTeams} />
           ))}
         </TeamBoxContainerStyled>
         <BtnBoxStyled>
-          <ConfirmBtnStyled onPress={onPress}>확인</ConfirmBtnStyled>
-          <CancelBtnStyled onPress={() => setIsModalVisible(false)}>취소</CancelBtnStyled>
+          <ConfirmBtnStyled onPress={onPressConfirmBtn}>확인</ConfirmBtnStyled>
+          <CancelBtnStyled onPress={onPressCancelBtn}>취소</CancelBtnStyled>
         </BtnBoxStyled>
       </ModalViewStyled>
     </Modal>

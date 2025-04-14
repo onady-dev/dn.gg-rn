@@ -12,8 +12,7 @@ import axios from "axios";
 import SelectPlayerBox from "@/components/SelectPlayerBox";
 import BasicModal from "@/components/BasicModal";
 import UpdateModal from "@/components/UpdateModal";
-
-let guestNumber = 0;
+import logItemState from "@/atoms/LogItemState";
 
 export default function HomeScreen() {
   const [players, setPlayers] = useState<Map<number, Player>>(new Map());
@@ -23,6 +22,9 @@ export default function HomeScreen() {
   const [addPlayerModalVisible, setAddPlayerModalVisible] = useState(false);
   const [updatePlayerModalVisible, setUpdatePlayerModalVisible] = useState(false);
   const [addPlayerName, setAddPlayerName] = useState("");
+  const [updatePlayerId, setUpdatePlayerId] = useState<number | null>(null);
+  const [groupId, setGroupId] = useState<number | null>(null);
+
   useEffect(() => {
     const asyncWrap = async () => {
       const players: Map<number, Player> | undefined = await getPlayers();
@@ -37,6 +39,7 @@ export default function HomeScreen() {
     try {
       const group = await AsyncStorage.getItem("group");
       const { id } = JSON.parse(group || "{}");
+      setGroupId(id);
       const getPlayers = await axios
         .get(`${process.env.EXPO_PUBLIC_API_URL}/player?groupId=${id}`, {
           headers: {
@@ -158,13 +161,30 @@ export default function HomeScreen() {
     setAddPlayerModalVisible(false);
   };
 
+  const onPressUpdatePlayerDeleteBtn = async () => {
+    if (!updatePlayerId) return;
+    const result = await deletePlayer(updatePlayerId);
+    setPlayers((prev) => {
+      const newState = new Map(prev);
+      newState.delete(updatePlayerId);
+      return newState;
+    });
+    setUpdatePlayerModalVisible(false);
+  };
+
   const createPlayer = async (name: string) => {
     const group = await AsyncStorage.getItem("group");
     const { id } = JSON.parse(group || "{}");
-    return await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/player`, {
+    const result = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/player`, {
       groupId: id,
       name,
     });
+    return result;
+  };
+
+  const deletePlayer = async (id: number) => {
+    const result = await axios.delete(`${process.env.EXPO_PUBLIC_API_URL}/player/${id}?groupId=${groupId}`);
+    return result;
   };
 
   // const updatePlayer = async (id: number, name: string) => {
@@ -178,12 +198,17 @@ export default function HomeScreen() {
 
   const onLongPressPlayer = (id: number) => {
     setAddPlayerName(players.get(id)?.getName() || "");
+    setUpdatePlayerId(id);
     setUpdatePlayerModalVisible(true);
   };
 
   const onPressPlusTeamBtn = async () => {
     setTeams((prev) => [...prev, new Team(teams.length + 1, String.fromCharCode(65 + teams.length))]);
     setSelectedTeamPlayers((prev) => [...prev, new Map()]);
+  };
+
+  const clearAsyncStorage = async () => {
+    await AsyncStorage.clear();
   };
 
   return (
@@ -207,7 +232,7 @@ export default function HomeScreen() {
         {teams.map((team: Team, i: number) => (
           <SelectPlayerBox key={team.getId()} team={team} onPressInBtn={onPressInBtn} onPressOutBtn={onPressOutBtn} onPressPlayerInTeam={onPressPlayerInTeam} />
         ))}
-        <PlusTeamBtnStyled onPress={onPressPlusTeamBtn}>
+        <PlusTeamBtnStyled onPress={onPressPlusTeamBtn} onLongPress={() => clearAsyncStorage()}>
           <Text style={{ fontSize: 50, fontWeight: "bold" }}>+</Text>
         </PlusTeamBtnStyled>
       </ScrollTeamBoxStyled>
@@ -225,7 +250,7 @@ export default function HomeScreen() {
         text={addPlayerName}
         isModalVisible={updatePlayerModalVisible}
         onPressSave={onPressPlusPlayerConfirmBtn}
-        onPressDelete={onPressPlusPlayerConfirmBtn}
+        onPressDelete={onPressUpdatePlayerDeleteBtn}
         onChangeText={setAddPlayerName}
         placeholder="플레이어 이름을 입력하세요"
         isCancelable={true}

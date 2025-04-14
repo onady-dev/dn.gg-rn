@@ -9,6 +9,7 @@ class Game {
   awayScore: number;
   logStack: LogStack;
   winner: Team | null;
+  createdAt: Date;
   constructor(id: number, homeTeam: Team, awayTeam: Team) {
     this.id = id;
     this.homeTeam = homeTeam;
@@ -17,9 +18,13 @@ class Game {
     this.awayScore = 0;
     this.logStack = new LogStack();
     this.winner = null;
+    this.createdAt = new Date();
   }
   getId() {
     return this.id;
+  }
+  setId(id: number) {
+    this.id = id;
   }
   getHomeTeam() {
     return this.homeTeam;
@@ -35,6 +40,9 @@ class Game {
   }
   getLogStack() {
     return this.logStack;
+  }
+  getCreatedAt() {
+    return this.createdAt;
   }
 
   addHomeScore(score: number) {

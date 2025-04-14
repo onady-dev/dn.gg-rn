@@ -3,25 +3,62 @@ import styled from "styled-components/native";
 import TextButton from "./TextButton";
 import { useEffect, useState } from "react";
 import LogStack from "@/class/LogStack";
-import { RECORDS } from "@/Records";
+import { useRecoilState } from "recoil";
+import logItemState from "@/atoms/LogItemState";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+type Player = {
+  id: number;
+  name: string;
+};
 
 export default function TeamBox({
+  gameId,
   team,
   teamName,
   players,
   setLogs,
   score,
+  isSwap,
 }: // addScore,
 {
+  gameId: number;
   team: string;
   teamName: string;
-  players: string[];
+  players: Player[];
   setLogs: (logs: string) => void;
   score: number;
+  isSwap: boolean;
   // addScore: (score: number) => void;
 }) {
   const [isPicked, setIsPicked] = useState<boolean>(false);
-  const [playerName, setPlayerName] = useState<string>("");
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [logItems, setLogItems] = useState<Map<number, LogItem>>(new Map());
+  useEffect(() => {
+    const asyncWrap = async () => {
+      const logItems = await AsyncStorage.getItem("logItems");
+      if (logItems) {
+        const map = new Map();
+        JSON.parse(logItems).map((logItem: LogItem, i: number) => {
+          map.set(logItem.id, { id: logItem.id, name: logItem.name, value: logItem.value });
+        });
+        map.set(0, { name: "취소", value: 0 });
+        setLogItems(map);
+      }
+    };
+    asyncWrap();
+  }, []);
+
+  useEffect(() => {
+    setIsPicked(false);
+  }, [gameId, isSwap]);
+
+  const onPressLogItem = (logItem: LogItem) => {
+    if (logItem.name !== "취소") {
+      setLogs(`${team + "/" + teamName + "/" + player?.name + "/" + logItem.id + "/" + player?.id}`);
+    }
+    setIsPicked(false);
+  };
 
   return (
     <Box>
@@ -29,26 +66,14 @@ export default function TeamBox({
       <Score>{score}</Score>
       <ButtonBox>
         {isPicked
-          ? Object.values(RECORDS).map((record, index) => (
+          ? Array.from(logItems.values()).map((logItem, index) => <TextButton key={index} text={logItem.name} onPress={() => onPressLogItem(logItem)} />)
+          : players?.map((player, index) => (
               <TextButton
                 key={index}
-                text={record.name}
-                onPress={() => {
-                  if (index !== 9) {
-                    // addScore(record.value);
-                    setLogs(`${team + "/" + teamName + "/" + playerName + "/" + index}`);
-                  }
-                  setIsPicked(false);
-                }}
-              />
-            ))
-          : players.map((player) => (
-              <TextButton
-                key={player}
-                text={player}
+                text={player.name}
                 onPress={() => {
                   setIsPicked(true);
-                  setPlayerName(player);
+                  setPlayer({ id: player.id, name: player.name });
                 }}
               />
             ))}

@@ -27,6 +27,12 @@ export default function TabLayout() {
           title: "Board",
         }}
       />
+      <Tabs.Screen
+        name="stats"
+        options={{
+          title: "Stats",
+        }}
+      />
     </Tabs>
   );
 }
