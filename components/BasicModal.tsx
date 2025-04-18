@@ -1,4 +1,4 @@
-import { Text, Modal, View, TextInput } from "react-native";
+import { Text, Modal, View, TextInput, Platform, Dimensions } from "react-native";
 import styled from "styled-components/native";
 
 export default function BasicModal({
@@ -18,19 +18,31 @@ export default function BasicModal({
   isCancelable?: boolean;
   setIsModalVisible: (isModalVisible: boolean) => void;
 }) {
+  const windowWidth = Dimensions.get('window').width;
+  const isWeb = Platform.OS === 'web';
+  const fontSize = isWeb ? Math.min(windowWidth * 0.03, 40) : 40;
+  const padding = isWeb ? Math.min(windowWidth * 0.02, 20) : 20;
+
   return (
     <Modal visible={isModalVisible} animationType="slide" transparent={true}>
       <ModalView>
         {placeholder ? (
-          <TextInputStyled placeholderTextColor={"gray"} placeholder={placeholder} onChangeText={onChangeText}>
-            {text}
-          </TextInputStyled>
+          <TextInputStyled 
+            placeholderTextColor={"gray"} 
+            placeholder={placeholder} 
+            onChangeText={onChangeText} 
+            value={text}
+          />
         ) : (
           <TextStyled>{text}</TextStyled>
         )}
         <BtnBox>
-          <ConfirmBtn onPress={onPressConfirm}>확인</ConfirmBtn>
-          {isCancelable && <CancelBtn onPress={() => setIsModalVisible(false)}>취소</CancelBtn>}
+          <ConfirmBtn style={{ fontSize, padding }} onPress={onPressConfirm}>확인</ConfirmBtn>
+          {isCancelable && (
+            <CancelBtn style={{ fontSize, padding }} onPress={() => setIsModalVisible(false)}>
+              취소
+            </CancelBtn>
+          )}
         </BtnBox>
       </ModalView>
     </Modal>
@@ -40,34 +52,36 @@ export default function BasicModal({
 const BtnBox = styled(View)`
   flex-direction: row;
   justify-content: space-between;
+  width: 100%;
 `;
 
 const CancelBtn = styled(Text)`
   font-weight: bold;
-  font-size: 40px;
   text-align: center;
   justify-content: center;
   color: #000000;
-  padding: 20px;
 `;
+
 const ModalView = styled(View)`
-  margin-top: 230px;
+  margin: auto;
   background-color: white;
   border-radius: 20px;
-  padding: 35px;
-  margin-left: 20%;
-  margin-right: 20%;
+  padding: ${Platform.OS === 'web' ? '3vw' : '35px'};
+  width: ${Platform.OS === 'web' ? '80%' : '60%'};
+  max-width: 600px;
   align-items: center;
   border-width: 2px;
 `;
 
 const TextInputStyled = styled(TextInput)`
   width: 100%;
-  font-size: 30px;
+  font-size: ${Platform.OS === 'web' ? '2vw' : '30px'};
+  min-font-size: 16px;
+  max-font-size: 30px;
   text-align: center;
   color: #000000;
-  padding: 10px;
-  margin: 10px;
+  padding: ${Platform.OS === 'web' ? '1vw' : '10px'};
+  margin: ${Platform.OS === 'web' ? '1vw' : '10px'};
   background-color: #f4f4f4;
   border-width: 1px;
   border-radius: 10px;
@@ -75,19 +89,19 @@ const TextInputStyled = styled(TextInput)`
 
 const TextStyled = styled(Text)`
   width: 100%;
-  font-size: 30px;
+  font-size: ${Platform.OS === 'web' ? '2vw' : '30px'};
+  min-font-size: 16px;
+  max-font-size: 30px;
   text-align: center;
   color: #000000;
   font-weight: bold;
-  padding: 10px;
-  margin: 10px;
+  padding: ${Platform.OS === 'web' ? '1vw' : '10px'};
+  margin: ${Platform.OS === 'web' ? '1vw' : '10px'};
 `;
 
 const ConfirmBtn = styled(Text)`
   font-weight: bold;
-  font-size: 40px;
   text-align: center;
   justify-content: center;
   color: #000000;
-  padding: 20px;
 `;

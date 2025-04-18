@@ -80,7 +80,7 @@ export default function RootLayout() {
     <RecoilRoot>
       {isModalVisible ? (
         <BasicModal
-          text=""
+          text={groupName}
           isModalVisible={isModalVisible}
           onPressConfirm={onPressConfirm}
           onChangeText={setGroupName}
